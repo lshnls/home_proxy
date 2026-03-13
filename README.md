@@ -38,27 +38,6 @@ curl -x http://127.0.0.1:8118 https://api.ipify.org?format=json
 curl --proxy http://localhost:3128 https://check.torproject.org/api/ip
 ```
 
-## Структура проекта
-
-```
-home_proxy/
-├── docker-compose.yml       # Полная конфигурация всех сервисов
-├── docker-compose.quick.yml # Минимальная конфигурация
-├── Makefile                 # Удобные команды управления
-├── config/                  # Конфигурационные файлы сервисов
-│   ├── unbound.conf        # DNS конфигурация
-│   ├── torrc               # Tor конфигурация
-│   ├── squid.conf          # Squid конфигурация
-│   └── privoxy/            # Privoxy конфигурация
-├── scripts/                # Утилиты
-│   ├── setup-iptables.sh  # Настройка перехвата трафика
-│   └── health-check.sh    # Проверка здоровья сервисов
-└── docs/                   # Документация
-    ├── QUICKSTART.md       # Быстрый старт (5 минут)
-    ├── SETUP.md           # Полная документация
-    └── PROJECT_STRUCTURE.md # Архитектура проекта
-```
-
 ## Основные команды
 
 ```bash
