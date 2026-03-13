@@ -14,7 +14,7 @@ services:
     networks:
       - $DOCKER_NETWORK
     command: unbound -d -c /etc/unbound/unbound.conf
-    mem_limit: 128M
+    mem_limit: 32M
     cpus: 1
 
   tor:
@@ -31,8 +31,8 @@ services:
       - ./tor/config/torrc:/etc/tor/torrc
       - ./tor/config/bridges.list:/etc/tor/bridges.list
       - ./tor/data:/var/lib/tor
-    mem_limit: 128M
-    cpus: 1
+    mem_limit: 256M
+    cpus: 2
 
 
   privoxy:
@@ -74,7 +74,7 @@ services:
       - privoxy
     restart: unless-stopped
     mem_limit: 128M
-    cpus: 1
+    cpus: 2
 
 networks:
   proxy_network:
