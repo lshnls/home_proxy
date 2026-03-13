@@ -1,6 +1,6 @@
 # Home Proxy - Безопасная система маршрутизации трафика
 
-## 📋 Состав проекта
+## Состав проекта
 
 Проект состоит из конфигурационных файлов приложений для создания полнофункциональной проксирующей системы:
 
@@ -12,9 +12,9 @@
 - **obfs4** — транспортный плагин - кодирование Tor-трафика под случайный шум
 
 
-## 🚀 Быстрый старт
+## Быстрый старт
 
-### 1️⃣ Минимум команд для запуска
+### Минимум команд для запуска
 
 ```bash
 cd /home/lshnls/git/home_proxy
@@ -22,7 +22,7 @@ docker-compose up -d
 make test-all
 ```
 
-### 2️⃣ Проверить работу
+### Проверить работу
 
 ```bash
 # DNS
@@ -38,7 +38,7 @@ curl -x http://127.0.0.1:8118 https://api.ipify.org?format=json
 curl --proxy http://localhost:3128 https://check.torproject.org/api/ip
 ```
 
-## 📁 Структура проекта
+## Структура проекта
 
 ```
 home_proxy/
@@ -59,7 +59,7 @@ home_proxy/
     └── PROJECT_STRUCTURE.md # Архитектура проекта
 ```
 
-## 🔧 Основные команды
+## Основные команды
 
 ```bash
 # Запуск всех сервисов
@@ -81,7 +81,7 @@ docker-compose restart
 make test-all
 ```
 
-## 📊 Сервисы и их порты
+## Сервисы и их порты
 
 | Сервис | Порт | Назначение |
 |--------|------|-----------|
@@ -90,7 +90,7 @@ make test-all
 | Privoxy | 8118/TCP | HTTP прокси → Tor |
 | Squid | 3128/TCP | Прозрачный HTTP прокси |
 
-## 🛡️ Безопасность
+## Безопасность
 
 ✅ DNS резолюция через TLS  
 ✅ Трафик через Tor для анонимности  
@@ -100,13 +100,13 @@ make test-all
 ✅ Контейнеры без лишних привилегий  
 ✅ Поддержка obfs4 и WebTunnel для скрытия Tor-трафика  
 
-## 📚 Документация
+## Документация
 
 - [QUICKSTART.md](QUICKSTART.md) - **За 5 минут до работающей системы**
 - [SETUP.md](SETUP.md) - **Полная инструкция и конфигурация**
 - [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - **Архитектура и структура**
 
-## ⚡ Примеры использования
+## Примеры использования
 
 ### Использование DNS (Unbound)
 ```bash
@@ -129,7 +129,7 @@ curl -x http://127.0.0.1:8118 https://api.ipify.org?format=json
 curl -x http://127.0.0.1:3128 https://api.ipify.org?format=json
 ```
 
-## 🔍 Требования
+## Требования
 
 - Docker >= 20.10
 - Docker Compose >= 2.0
@@ -137,14 +137,14 @@ curl -x http://127.0.0.1:3128 https://api.ipify.org?format=json
 - минимум 500 MB RAM
 - 2-3 GB дискового пространства
 
-## 📦 Используемые образы
+## Используемые образы
 
 - **mvance/unbound:latest** - Unbound DNS
 - **osminogin/tor-simple:latest** - Tor
 - **ghcr.io/binhex/arch-privoxy:latest** - Privoxy
 - **ubuntu/squid:latest** - Squid
 
-## 🎯 Типичные сценарии использования
+## Типичные сценарии использования
 
 ### Сценарий 1: Безопасный домашний интернет
 ```bash
@@ -165,10 +165,7 @@ curl -x socks5://127.0.0.1:9050 https://api.ipify.org
 curl -x http://127.0.0.1:8118 https://api.ipify.org
 ```
 
-## ❓ FAQ
-
-**Q: Как быстро запустить?**  
-A: Прочитайте [QUICKSTART.md](QUICKSTART.md)
+## FAQ
 
 **Q: Будет ли медленнее интернет?**  
 A: Да, немного медленнее, но намного безопаснее
@@ -179,7 +176,7 @@ A: Да, просто отредактируйте docker-compose.yml
 **Q: Как изменить конфигурацию?**  
 A: Отредактируйте файлы в `config/` и перезагрузитесь
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ```bash
 # Проверить логи
@@ -192,14 +189,14 @@ bash scripts/health-check.sh
 docker-compose restart SERVICE_NAME
 ```
 
-## 📄 Лицензия
+## Лицензия
 
 MIT License
 
-## 🙋 Поддержка
+## Поддержка
 
 Создавайте issues для вопросов и проблем.
 
 ---
 
-**Начните за 5 минут:** [QUICKSTART.md](QUICKSTART.md) | **Полная инструкция:** [SETUP.md](SETUP.md) | **Архитектура:** [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
+**Архитектура:** [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
