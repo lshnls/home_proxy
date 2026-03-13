@@ -4,28 +4,10 @@
 .env.*.local
 
 # Docker volumes
-squid_cache/
-squid_logs/
-tor_data/
-
-# Logs
-logs/
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
+.tor/data/
 
 # IDE
 .vscode/
 .idea/
 *.code-workspace
 
-# Certificates
-*.pem
-*.key
-*.crt
-*.cert
