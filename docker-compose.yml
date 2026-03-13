@@ -1,0 +1,81 @@
+services:
+  unbound:
+    build:
+      context: ./unbound
+      dockerfile: Dockerfile
+    container_name: home_proxy_unbound
+    restart: unless-stopped
+    ports:
+      - "$UNBOUND_PORT:53/tcp"
+      - "$UNBOUND_PORT:53/udp"
+    volumes:
+      - ./unbound/config/unbound.conf:/etc/unbound/unbound.conf
+  
+    networks:
+      - $DOCKER_NETWORK
+    command: unbound -d -c /etc/unbound/unbound.conf
+    mem_limit: 128M
+    cpus: 1
+
+  tor:
+    build:
+      context: ./tor
+      dockerfile: Dockerfile
+    container_name: home_proxy_tor
+    restart: unless-stopped
+    ports:
+      - $TOR_SOCKS_PORT:9050/tcp
+    networks:
+      - $DOCKER_NETWORK
+    volumes:
+      - ./tor/config/torrc:/etc/tor/torrc
+      - ./tor/config/bridges.list:/etc/tor/bridges.list
+      - ./tor/data:/var/lib/tor
+    mem_limit: 128M
+    cpus: 1
+
+
+  privoxy:
+    build:
+      context: ./privoxy
+      dockerfile: Dockerfile
+    container_name: home_proxy_privoxy
+    restart: unless-stopped
+    ports:
+      - "$PRIVOXY_PORT:8118"
+    volumes:
+      - ./privoxy/config/config:/etc/privoxy/config
+      - ./privoxy/config/match-all.action:/etc/privoxy/match-all.action
+      - ./privoxy/config/user.action:/etc/privoxy/user.action
+      - ./privoxy/config/default.action:/etc/privoxy/default.action
+
+    networks:
+      - $DOCKER_NETWORK
+    depends_on:
+      - tor
+    mem_limit: 32M
+    cpus: 1
+
+  squid:
+    build:
+      context: ./squid
+      dockerfile: Dockerfile
+    container_name: home_proxy_squid
+    ports:
+      - "$SQUID_PORT:3128"
+      - "$SQUID_HTTP_PORT:8081"
+      - "$SQUID_HTTPS_PORT:8082"
+    volumes:
+      - ./squid/config/squid.conf:/etc/squid/squid.conf
+      - ./squid/config/tor.list:/etc/squid/tor.list
+    networks:
+      - $DOCKER_NETWORK
+    depends_on:
+      - privoxy
+    restart: unless-stopped
+    mem_limit: 128M
+    cpus: 1
+
+networks:
+  proxy_network:
+    driver: bridge

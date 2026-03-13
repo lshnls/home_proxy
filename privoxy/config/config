@@ -1,0 +1,30 @@
+# Privoxy configuration
+
+# Основные параметры
+confdir /etc/privoxy
+#logdir /var/log/privoxy
+actionsfile match-all.action # Default actions
+actionsfile default.action   # Standard actions
+actionsfile user.action      # User-defined actions
+
+# Слушать порт
+listen-address 0.0.0.0:8118
+#listen-address [::]:8118
+
+# Форвардизация в Tor
+forward-socks5 / tor:9050 .
+
+# Тайм-ауты
+socket-timeout 300
+keep-alive-timeout 5
+
+# Логирование
+debug 0
+
+# Разное
+toggle 1
+enable-remote-toggle 0
+enable-remote-http-toggle 0
+enable-edit-actions 0
+buffer-limit 4096
+

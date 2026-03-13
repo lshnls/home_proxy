@@ -1,0 +1,14 @@
+# User-defined actions for Privoxy
+
+{ +forward-override{forward-socks5 tor:9050 .} }
+.onion
+
+# Блокировать рекламу и трекеры
+{ +block{Ads blocked} }
+.doubleclick.net
+.googleadservices.com
+.googlesyndication.com
+.facebook.com/tr
+.facebook.com/tr/
+.analytics.google.com
+metrics.*.doubleclick.net
