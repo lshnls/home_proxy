@@ -1,7 +1,8 @@
-FROM alpine:latest
+FROM alpine:3.20
 
-RUN apk add --no-cache squid
-RUN apk add --no-cache openssl
+RUN apk add --no-cache \ 
+    squid \
+    openssl
 
 RUN mkdir -p /etc/squid/ssl
 COPY ./config/squid.conf /etc/squid/squid.conf
