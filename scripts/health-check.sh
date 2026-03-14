@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Скрипт для проверки состояния всех сервисов
 
-set -e
+set -euo pipefail
 
-echo "=== Проверка состояния Home Proxy сервисов ==="
-echo ""
+# Таймаут проверок портов (сек)
+CHECK_TIMEOUT="${CHECK_TIMEOUT:-1}"
 
 # Цвета для вывода
 RED='\033[0;31m'
@@ -12,13 +12,25 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Выбор команды compose (docker compose plugin или docker-compose)
+if docker compose version >/dev/null 2>&1; then
+    COMPOSE_CMD=(docker compose)
+elif command -v docker-compose >/dev/null 2>&1; then
+    COMPOSE_CMD=(docker-compose)
+else
+    echo -e "${RED}✗${NC} Не найдено ни 'docker compose', ни 'docker-compose'"
+    exit 1
+fi
+
+echo "=== Проверка состояния Home Proxy сервисов ==="
+echo ""
+
 # Функция для проверки
 check_service() {
-    local service=$1
-    local port=$2
-    local protocol=${3:-tcp}
-    
-    if nc -z -w5 127.0.0.1 $port 2>/dev/null; then
+    local service="$1"
+    local port="$2"
+
+    if nc -z -w"$CHECK_TIMEOUT" 127.0.0.1 "$port" 2>/dev/null; then
         echo -e "${GREEN}✓${NC} $service (порт $port) - работает"
         return 0
     else
@@ -31,10 +43,19 @@ check_service() {
 echo "Статус контейнеров:"
 echo ""
 
-RUNNING=$(docker-compose ps --services --filter "status=running" | wc -l)
-TOTAL=$(docker-compose ps --services | wc -l)
+# Минимизируем число вызовов docker compose: один список сервисов + один список running
+mapfile -t ALL_SERVICES < <("${COMPOSE_CMD[@]}" ps --services)
+mapfile -t RUNNING_SERVICES < <("${COMPOSE_CMD[@]}" ps --services --filter "status=running")
+
+TOTAL="${#ALL_SERVICES[@]}"
+RUNNING="${#RUNNING_SERVICES[@]}"
 
 echo "Запущено контейнеров: $RUNNING из $TOTAL"
+
+if (( TOTAL > 0 && RUNNING < TOTAL )); then
+    echo -e "${YELLOW}!${NC} Не все контейнеры запущены"
+fi
+
 echo ""
 
 # Детальная проверка
@@ -50,11 +71,11 @@ check_service "Squid" 3128 || ((FAILED++))
 
 echo ""
 echo "Статус Docker контейнеров:"
-docker-compose ps
+"${COMPOSE_CMD[@]}" ps
 
 echo ""
 
-if [ $FAILED -eq 0 ]; then
+if [ "$FAILED" -eq 0 ]; then
     echo -e "${GREEN}✓ Все сервисы работают корректно${NC}"
     exit 0
 else

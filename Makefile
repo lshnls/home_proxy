@@ -1,4 +1,7 @@
-.PHONY: help build up down logs clean restart shell ps
+.PHONY: help build up down logs clean restart shell ps logs-tor logs-unbound logs-squid logs-privoxy shell-tor shell-unbound test-dns test-tor test-proxy test-squid test-all up-tor up-unbound up-squid up-privoxy restart-tor restart-squid status version
+
+COMPOSE := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi)
+CURL_TIMEOUT ?= 10
 
 help:
 	@echo "=== Home Proxy Docker Compose Commands ==="
@@ -17,53 +20,53 @@ help:
 	@echo ""
 
 build:
-	docker-compose build
+	$(COMPOSE) build
 
 up:
 	@echo "Запуск сервисов..."
-	docker-compose up -d
+	$(COMPOSE) up -d
 	@echo "Проверка статуса..."
-	docker-compose ps
+	$(COMPOSE) ps
 
 down:
 	@echo "Остановка сервисов..."
-	docker-compose down
+	$(COMPOSE) down
 
 ps:
-	docker-compose ps
+	$(COMPOSE) ps
 
 logs:
-	docker-compose logs -f
+	$(COMPOSE) logs -f
 
 logs-tor:
-	docker-compose logs -f tor
+	$(COMPOSE) logs -f tor
 
 logs-unbound:
-	docker-compose logs -f unbound
+	$(COMPOSE) logs -f unbound
 
 logs-squid:
-	docker-compose logs -f squid
+	$(COMPOSE) logs -f squid
 
 logs-privoxy:
-	docker-compose logs -f privoxy
+	$(COMPOSE) logs -f privoxy
 
 clean:
 	@echo "Удаление контейнеров..."
-	docker-compose down -v
+	$(COMPOSE) down -v
 	@echo "Очистка завершена"
 
 restart:
 	@echo "Перезагрузка контейнеров..."
-	docker-compose restart
+	$(COMPOSE) restart
 
 shell:
-	docker-compose exec squid /bin/bash
+	$(COMPOSE) exec squid /bin/bash
 
 shell-tor:
-	docker-compose exec tor /bin/bash
+	$(COMPOSE) exec tor /bin/bash
 
 shell-unbound:
-	docker-compose exec unbound /bin/bash
+	$(COMPOSE) exec unbound /bin/bash
 
 # Тесты
 test-dns:
@@ -72,41 +75,41 @@ test-dns:
 
 test-tor:
 	@echo "=== Проверка SOCKS (Tor) ==="
-	curl -s -x socks5://127.0.0.1:9050 https://check.torproject.org/api/ip || echo "Tor SOCKS не доступен"
+	curl -sS --max-time $(CURL_TIMEOUT) -x socks5://127.0.0.1:9050 https://check.torproject.org/api/ip || echo "Tor SOCKS не доступен"
 
 test-proxy:
 	@echo "=== Проверка HTTP прокси (Privoxy) ==="
-	curl -s -x http://127.0.0.1:8118 https://check.torproject.org/api/ip || echo "Privoxy не доступен"
+	curl -sS --max-time $(CURL_TIMEOUT) -x http://127.0.0.1:8118 https://check.torproject.org/api/ip || echo "Privoxy не доступен"
 
 test-squid:
 	@echo "=== Проверка Squid прокси ==="
-	curl -s -x http://127.0.0.1:3128 https://api.ipify.org?format=json || echo "Squid не доступен"
+	curl -sS --max-time $(CURL_TIMEOUT) -x http://127.0.0.1:3128 https://api.ipify.org?format=json || echo "Squid не доступен"
 
 test-all: test-dns test-tor test-proxy test-squid
 	@echo "=== Все тесты завершены ==="
 
 # Управление отдельными сервисами
 up-tor:
-	docker-compose up -d tor
+	$(COMPOSE) up -d tor
 
 up-unbound:
-	docker-compose up -d unbound
+	$(COMPOSE) up -d unbound
 
 up-squid:
-	docker-compose up -d squid
+	$(COMPOSE) up -d squid
 
 up-privoxy:
-	docker-compose up -d privoxy
+	$(COMPOSE) up -d privoxy
 
 restart-tor:
-	docker-compose restart tor
+	$(COMPOSE) restart tor
 
 restart-squid:
-	docker-compose restart squid
+	$(COMPOSE) restart squid
 
 status:
 	@echo "=== Статус контейнеров ==="
-	docker-compose ps
+	$(COMPOSE) ps
 	@echo ""
 	@echo "=== Использование памяти ==="
 	docker stats --no-stream home_proxy_*
@@ -115,4 +118,4 @@ status:
 version:
 	@echo "=== Docker версии ==="
 	docker --version
-	docker-compose --version
+	$(COMPOSE) version
