@@ -12,7 +12,7 @@ listen-address 0.0.0.0:8118
 #listen-address [::]:8118
 
 # Форвардизация в Tor
-forward-socks5 / tor:9050 .
+forward-socks5 / home_proxy-tor:9050 .
 
 # Тайм-ауты
 socket-timeout 300

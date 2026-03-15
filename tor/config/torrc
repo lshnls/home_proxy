@@ -46,9 +46,10 @@ ExcludeExitNodes {ru},{by},{kz}
 # SOCKS порт для клиентов
 SocksPort 0.0.0.0:9050
 #SocksTimeout 30
-SocksPolicy accept 192.168.1.0/24
+SocksPolicy accept 192.168.0.0/16
 SocksPolicy accept 172.16.0.0/12
 SocksPolicy accept 127.0.0.0/8
+SocksPolicy accept 10.0.0.0/8
 SocksPolicy reject *
 
 
