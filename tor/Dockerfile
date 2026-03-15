@@ -1,18 +1,16 @@
 FROM alpine:latest
 
-RUN apk add --no-cache \ 
+RUN apk add --no-cache \
     tor \
     obfs4proxy
 
 COPY ./config/torrc /etc/tor/torrc
 COPY ./config/bridges.list /etc/tor/bridges.list
-#RUN adduser -D tor
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-#RUN mkdir -p /var/lib/tor && \
-#chown -R tor:tor /var/lib/tor
-
-# COPY torrc /etc/tor/torrc
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 9050
 
-CMD ["tor","-f","/etc/tor/torrc"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["tor", "-f", "/etc/tor/torrc"]
