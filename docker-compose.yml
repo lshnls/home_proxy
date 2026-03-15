@@ -30,7 +30,7 @@ services:
     volumes:
       - ./tor/config/torrc:/etc/tor/torrc
       - ./tor/config/bridges.list:/etc/tor/bridges.list
-      #- ./tor/data:/var/lib/tor
+      - ./tor/data:/var/lib/tor
     environment:
       - PROJECT_GID=${PROJECT_GID:-1000}
       - HOST_GROUP_NAME=${HOST_GROUP_NAME:-project}
