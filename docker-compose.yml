@@ -71,6 +71,7 @@ services:
     volumes:
       - ./squid/config/squid.conf:/etc/squid/squid.conf
       - ./squid/config/tor.list:/etc/squid/tor.list
+      - ./squid/ssl:/etc/squid/ssl
     networks:
       - $DOCKER_NETWORK
     depends_on:
