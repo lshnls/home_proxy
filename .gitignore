@@ -4,7 +4,7 @@
 .env.*.local
 
 # Docker volumes
-.tor/data/*
+.tor/data
 
 # IDE
 .vscode/
