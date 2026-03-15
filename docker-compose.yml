@@ -3,7 +3,7 @@ services:
     build:
       context: ./unbound
       dockerfile: Dockerfile
-    container_name: home_proxy_unbound
+    container_name: home_proxy-unbound
     restart: unless-stopped
     ports:
       - "$UNBOUND_PORT:53/tcp"
@@ -21,7 +21,7 @@ services:
     build:
       context: ./tor
       dockerfile: Dockerfile
-    container_name: home_proxy_tor
+    container_name: home_proxy-tor
     restart: unless-stopped
     ports:
       - $TOR_SOCKS_PORT:9050/tcp
@@ -30,7 +30,7 @@ services:
     volumes:
       - ./tor/config/torrc:/etc/tor/torrc
       - ./tor/config/bridges.list:/etc/tor/bridges.list
-      - ./tor/data:/var/lib/tor
+      #- ./tor/data:/var/lib/tor
     environment:
       - PROJECT_GID=${PROJECT_GID:-1000}
       - HOST_GROUP_NAME=${HOST_GROUP_NAME:-project}
@@ -42,7 +42,7 @@ services:
     build:
       context: ./privoxy
       dockerfile: Dockerfile
-    container_name: home_proxy_privoxy
+    container_name: home_proxy-privoxy
     restart: unless-stopped
     ports:
       - "$PRIVOXY_PORT:8118"
@@ -63,7 +63,7 @@ services:
     build:
       context: ./squid
       dockerfile: Dockerfile
-    container_name: home_proxy_squid
+    container_name: home_proxy-squid
     ports:
       - "$SQUID_PORT:3128"
       - "$SQUID_HTTP_PORT:8081"
