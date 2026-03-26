@@ -81,9 +81,7 @@ make test-all
 
 ## Документация
 
-- [QUICKSTART.md](QUICKSTART.md) - **За 5 минут до работающей системы**
-- [SETUP.md](SETUP.md) - **Полная инструкция и конфигурация**
-- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - **Архитектура и структура**
+[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - **Архитектура и структура**
 
 ## Примеры использования
 
