@@ -5,14 +5,14 @@ services:
       dockerfile: Dockerfile
     container_name: home_proxy-unbound
     restart: unless-stopped
-#    ports:
-#      - "$UNBOUND_PORT:53/tcp"
-#      - "$UNBOUND_PORT:53/udp"
+    ports:
+      - "$UNBOUND_PORT:53/tcp"
+      - "$UNBOUND_PORT:53/udp"
     volumes:
       - ./unbound/config/unbound.conf:/etc/unbound/unbound.conf
-#    networks:
-#      - $DOCKER_NETWORK
-    network_mode: host
+    networks:
+      - $DOCKER_NETWORK
+#    network_mode: host
     command: unbound -d -c /etc/unbound/unbound.conf
     #mem_limit: 32M
     #cpus: 1
@@ -23,11 +23,11 @@ services:
       dockerfile: Dockerfile
     container_name: home_proxy-tor
     restart: unless-stopped
-#    ports:
-#      - $TOR_SOCKS_PORT:9050/tcp
-#    networks:
-#      - $DOCKER_NETWORK
-    network_mode: host
+    ports:
+      - $TOR_SOCKS_PORT:9050/tcp
+    networks:
+      - $DOCKER_NETWORK
+#    network_mode: host
     volumes:
       - ./tor/config/torrc:/etc/tor/torrc
       - ./tor/config/bridges.list:/etc/tor/bridges.list
@@ -45,17 +45,17 @@ services:
       dockerfile: Dockerfile
     container_name: home_proxy-privoxy
     restart: unless-stopped
-#    ports:
-#      - "$PRIVOXY_PORT:8118"
-    network_mode: host
+    ports:
+      - "$PRIVOXY_PORT:8118"
+#    network_mode: host
     volumes:
       - ./privoxy/config/config:/etc/privoxy/config
       - ./privoxy/config/match-all.action:/etc/privoxy/match-all.action
       - ./privoxy/config/user.action:/etc/privoxy/user.action
       - ./privoxy/config/default.action:/etc/privoxy/default.action
 
-#    networks:
-#      - $DOCKER_NETWORK
+    networks:
+      - $DOCKER_NETWORK
 #    depends_on:
 #      - tor
     #mem_limit: 32M
