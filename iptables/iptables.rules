@@ -1,6 +1,7 @@
-# Правила iptables для прозрачного проксирования клиентов из LAN
-# Сеть клиентов: 192.168.1.0/24
-# Squid в Docker слушает опубликованные порты хоста 8081/8082
+# Прозрачное проксирование клиентов из LAN 192.168.1.0/24
+# Squid в Docker слушает опубликованные порты хоста:
+#   8081 -> http_port ... intercept
+#   8082 -> https_port ... intercept ssl-bump
 
 *nat
 :PREROUTING ACCEPT [0:0]
@@ -8,18 +9,24 @@
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
 
-# Не трогаем loopback и локальные/служебные назначения
+# Не трогаем loopback
 -A PREROUTING -i lo -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 192.168.1.0/24 -j RETURN
+
+# Не трогаем локальные/служебные назначения для клиентов LAN
+-A PREROUTING -s 192.168.1.0/24 -d 127.0.0.0/8 -j RETURN
 -A PREROUTING -s 192.168.1.0/24 -d 10.0.0.0/8 -j RETURN
 -A PREROUTING -s 192.168.1.0/24 -d 172.16.0.0/12 -j RETURN
 -A PREROUTING -s 192.168.1.0/24 -d 192.168.0.0/16 -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 127.0.0.0/8 -j RETURN
+-A PREROUTING -s 192.168.1.0/24 -d 169.254.0.0/16 -j RETURN
+-A PREROUTING -s 192.168.1.0/24 -d 224.0.0.0/4 -j RETURN
+-A PREROUTING -s 192.168.1.0/24 -d 240.0.0.0/4 -j RETURN
 
 # Прозрачное перенаправление HTTP/HTTPS в Squid
 -A PREROUTING -s 192.168.1.0/24 -p tcp --dport 80 -j REDIRECT --to-ports 8081
 -A PREROUTING -s 192.168.1.0/24 -p tcp --dport 443 -j REDIRECT --to-ports 8082
+
 COMMIT
+
 
 *filter
 :INPUT ACCEPT [0:0]
@@ -29,9 +36,12 @@ COMMIT
 # Разрешаем уже установленные соединения
 -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-# Разрешаем клиентам LAN выход через хост
+# Разрешаем клиентам LAN маршрутизацию через хост
 -A FORWARD -s 192.168.1.0/24 -j ACCEPT
 
-# Блокируем QUIC, чтобы HTTPS шел через TCP/443 (и попадал в прокси)
--A FORWARD -s 192.168.1.0/24 -p udp --dport 443 -j DROP
+# Блокируем QUIC, чтобы HTTPS шёл по TCP/443 и попадал в Squid
+-A FORWARD -s 192.168.1.0/24 -p udp --dport 443 -j REJECT
+# Можно и DROP вместо REJECT:
+# -A FORWARD -s 192.168.1.0/24 -p udp --dport 443 -j DROP
+
 COMMIT
