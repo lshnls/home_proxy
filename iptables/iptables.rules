@@ -22,12 +22,36 @@
 COMMIT
 
 *filter
-:INPUT ACCEPT [0:0]
+:INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 
 # Разрешаем уже установленные соединения
 -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# loopback
+-A INPUT -i lo -j ACCEPT
+
+# уже установленные соединения
+-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# SSH
+-A INPUT -p tcp --dport 22 -j ACCEPT
+
+# DNS
+-A INPUT -p udp --dport 53 -j ACCEPT
+-A INPUT -p tcp --dport 53 -j ACCEPT
+
+# Privoxy
+-A INPUT -p tcp --dport 8118 -j ACCEPT
+
+# Tor SOCKS
+-A INPUT -p tcp --dport 9050 -j ACCEPT
+
+# Squid
+-A INPUT -p tcp --dport 3128 -j ACCEPT
+-A INPUT -p tcp --dport 8081 -j ACCEPT
+-A INPUT -p tcp --dport 8082 -j ACCEPT
 
 # Разрешаем клиентам LAN выход через хост
 -A FORWARD -i enp0s31f6 -j ACCEPT
