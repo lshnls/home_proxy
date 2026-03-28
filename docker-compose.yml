@@ -14,8 +14,8 @@ services:
     networks:
       - $DOCKER_NETWORK
     command: unbound -d -c /etc/unbound/unbound.conf
-    mem_limit: 32M
-    cpus: 1
+    #mem_limit: 32M
+    #cpus: 1
 
   tor:
     build:
@@ -34,8 +34,8 @@ services:
     environment:
       - PROJECT_GID=${PROJECT_GID:-1000}
       - HOST_GROUP_NAME=${HOST_GROUP_NAME:-project}
-    mem_limit: 256M
-    cpus: 2
+    #mem_limit: 256M
+    #cpus: 2
 
 
   privoxy:
@@ -56,8 +56,8 @@ services:
       - $DOCKER_NETWORK
     depends_on:
       - tor
-    mem_limit: 32M
-    cpus: 1
+    #mem_limit: 32M
+    #cpus: 1
 
   squid:
     build:
@@ -77,8 +77,8 @@ services:
     depends_on:
       - privoxy
     restart: unless-stopped
-    mem_limit: 128M
-    cpus: 2
+    #mem_limit: 128M
+    #cpus: 2
 
 networks:
   proxy_network:
