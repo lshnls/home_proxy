@@ -13,6 +13,7 @@ if [ ! -f "$CERT_DIR/squidCA.key" ] || [ ! -f "$CERT_DIR/squidCA.crt" ]; then
 fi
 
   cat "$CERT_DIR/squidCA.crt" "$CERT_DIR/squidCA.key" > "$CERT_DIR/squidCA.pem"
-  chmod 600 "$CERT_DIR/squidCA.key"  "$CERT_DIR/squidCA.crt" "$CERT_DIR/squidCA.pem"
+  chmod 600 "$CERT_DIR/squidCA.key" "$CERT_DIR/squidCA.pem"
+  chmod 644 "$CERT_DIR/squidCA.crt"
 
 exec "$@"
