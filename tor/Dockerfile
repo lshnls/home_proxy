@@ -1,9 +1,7 @@
 FROM alpine:latest
 
 # Install required packages
-RUN apk add --no-cache \
-    tor \
-    obfs4proxy
+RUN apk add --no-cache tor obfs4proxy
 
 # Copy configuration files
 COPY ./config/torrc /etc/tor/torrc

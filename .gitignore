@@ -1,5 +1,6 @@
 # Docker volumes
-.tor/data
+.tor/data/
+.tor/data/*
 
 # IDE
 .vscode/
