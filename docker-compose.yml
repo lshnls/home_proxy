@@ -30,7 +30,7 @@ services:
 #    network_mode: host
     volumes:
       - ./tor/config/torrc:/etc/tor/torrc
-      - ./tor/config/bridges.list:/etc/tor/bridges.list
+      - ./tor/config/bridges.txt:/etc/tor/bridges.txt
       - ./tor/data:/var/lib/tor
     environment:
       - PROJECT_GID=${PROJECT_GID:-1000}
