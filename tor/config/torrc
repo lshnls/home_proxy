@@ -37,7 +37,8 @@ DataDirectory /var/lib/tor
 
 UseBridges 1
 ClientTransportPlugin obfs4 exec /usr/bin/lyrebird
-#ClientTransportPlugin obfs4 exec /usr/local/bin/obfs4proxy
+#ClientTransportPlugin snowflake exec /usr/bin/snowflake-proxy
+#ClientTransportPlugin webtunnel exec /usr/bin/lyrebird
 
 ExcludeExitNodes {ru},{by},{kz}
 
