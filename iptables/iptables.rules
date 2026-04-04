@@ -11,20 +11,15 @@
 
 # Не трогаем loopback
 -A PREROUTING -i lo -j RETURN
-
-# Не трогаем локальные/служебные назначения для клиентов LAN
--A PREROUTING -s 192.168.1.0/24 -d 127.0.0.0/8 -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 10.0.0.0/8 -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 172.16.0.0/12 -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 192.168.0.0/16 -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 169.254.0.0/16 -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 224.0.0.0/4 -j RETURN
--A PREROUTING -s 192.168.1.0/24 -d 240.0.0.0/4 -j RETURN
+-A PREROUTING -i enp0s31f6 -d 192.168.1.0/24 -j RETURN
+-A PREROUTING -i enp0s31f6 -d 10.0.0.0/8 -j RETURN
+-A PREROUTING -i enp0s31f6 -d 172.16.0.0/12 -j RETURN
+-A PREROUTING -i enp0s31f6 -d 192.168.0.0/16 -j RETURN
+-A PREROUTING -i enp0s31f6 -d 127.0.0.0/8 -j RETURN
 
 # Прозрачное перенаправление HTTP/HTTPS в Squid
--A PREROUTING -s 192.168.1.0/24 -p tcp --dport 80 -j REDIRECT --to-ports 8081
--A PREROUTING -s 192.168.1.0/24 -p tcp --dport 443 -j REDIRECT --to-ports 8082
-
+-A PREROUTING -i enp0s31f6 -p tcp --dport 80 -j REDIRECT --to-ports 8081
+-A PREROUTING -i enp0s31f6 -p tcp --dport 443 -j REDIRECT --to-ports 8082
 COMMIT
 
 
@@ -36,12 +31,39 @@ COMMIT
 # Разрешаем уже установленные соединения
 -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-# Разрешаем клиентам LAN маршрутизацию через хост
--A FORWARD -s 192.168.1.0/24 -j ACCEPT
+# loopback
+-A INPUT -i lo -j ACCEPT
 
-# Блокируем QUIC, чтобы HTTPS шёл по TCP/443 и попадал в Squid
--A FORWARD -s 192.168.1.0/24 -p udp --dport 443 -j REJECT
-# Можно и DROP вместо REJECT:
-# -A FORWARD -s 192.168.1.0/24 -p udp --dport 443 -j DROP
+# уже установленные соединения
+-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
+# SSH
+-A INPUT -p tcp --dport 22 -j ACCEPT
+
+# DNS
+-A INPUT -p udp --dport 53 -j ACCEPT
+-A INPUT -p tcp --dport 53 -j ACCEPT
+
+# Privoxy
+-A INPUT -p tcp --dport 8118 -j ACCEPT
+
+# Tor SOCKS
+-A INPUT -p tcp --dport 9050 -j ACCEPT
+
+# Squid
+-A INPUT -p tcp --dport 3128 -j ACCEPT
+-A INPUT -p tcp --dport 8081 -j ACCEPT
+-A INPUT -p tcp --dport 8082 -j ACCEPT
+
+# Nginx
+-A INPUT -p tcp --dport 443 -j ACCEPT
+
+-A INPUT -p tcp --dport 5000 -j ACCEPT
+
+
+# Разрешаем клиентам LAN выход через хост
+-A FORWARD -i enp0s31f6 -j ACCEPT
+
+# Блокируем QUIC, чтобы HTTPS шел через TCP/443 (и попадал в прокси)
+-A FORWARD -i enp0s31f6 -p udp --dport 443 -j DROP
 COMMIT

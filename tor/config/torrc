@@ -41,7 +41,7 @@ ClientTransportPlugin obfs4 exec /usr/bin/lyrebird
 
 ExcludeExitNodes {ru},{by},{kz}
 
-%include /etc/tor/bridges.list
+%include /etc/tor/bridges.txt
 
 # SOCKS порт для клиентов
 SocksPort 0.0.0.0:9050
@@ -64,27 +64,27 @@ SocksPolicy reject *
 #SafeLogging 1
 
 # быстрее выбирать узлы
-#CircuitBuildTimeout 15
-#LearnCircuitBuildTimeout 1
+CircuitBuildTimeout 15
+LearnCircuitBuildTimeout 1
 
 # использовать цепочку дольше (меньше перестроений)
-#MaxCircuitDirtiness 600
+MaxCircuitDirtiness 600
 
 # больше соединений
-#ConnLimit 256
+ConnLimit 1024
 
 # быстрее держать соединения активными
-#KeepalivePeriod 60
+KeepalivePeriod 60
 
 # больше потоков в одной цепочке
-#MaxClientCircuitsPending 64
+MaxClientCircuitsPending 128
 
 # ускоряет загрузку директорий
-#UseEntryGuards 1
-#NumEntryGuards 8
+UseEntryGuards 1
+NumEntryGuards 8
 
 # чаще строить новые цепочки
-#NewCircuitPeriod 15
+NewCircuitPeriod 15
 
 
 #Log debug stdout
