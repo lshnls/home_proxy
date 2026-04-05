@@ -38,12 +38,21 @@ fi
 echo "=== Проверка состояния Home Proxy сервисов ==="
 echo ""
 
-# Функция для проверки
+# TCP на 127.0.0.1 (без nc: у openbsd/gnu/busybox разный набор флагов и часто ложные «не работает» с проброшенными портами)
+check_tcp_local() {
+    local port=$1
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$CHECK_TIMEOUT" bash -c "exec 3<>/dev/tcp/127.0.0.1/$port" 2>/dev/null
+    else
+        bash -c "exec 3<>/dev/tcp/127.0.0.1/$port" 2>/dev/null
+    fi
+}
+
 check_service() {
     local service="$1"
     local port="$2"
 
-    if nc -z -w"$CHECK_TIMEOUT" 127.0.0.1 "$port" 2>/dev/null; then
+    if check_tcp_local "$port"; then
         echo -e "${GREEN}✓${NC} $service (порт $port) - работает"
         return 0
     else
