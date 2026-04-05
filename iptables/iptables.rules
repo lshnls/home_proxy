@@ -1,4 +1,6 @@
 # Прозрачное проксирование клиентов из LAN 192.168.1.0/24
+# С Docker не применять этот файл целиком через iptables-restore — затрутся цепочки DOCKER.
+# Используйте: scripts/iptables.sh (порты из .env, bridge compose, свои цепочки HOME_PROXY_*).
 # Squid в Docker слушает опубликованные порты хоста:
 #   8081 -> http_port ... intercept
 #   8082 -> https_port ... intercept ssl-bump
