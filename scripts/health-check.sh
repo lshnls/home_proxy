@@ -3,6 +3,19 @@
 
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR" || exit 1
+if [[ -f .env ]]; then
+	set -a
+	# shellcheck source=/dev/null
+	source .env
+	set +a
+fi
+UNBOUND_PORT="${UNBOUND_PORT:-53}"
+TOR_SOCKS_PORT="${TOR_SOCKS_PORT:-9050}"
+PRIVOXY_PORT="${PRIVOXY_PORT:-8118}"
+SQUID_PORT="${SQUID_PORT:-3128}"
+
 # Таймаут проверок портов (сек)
 CHECK_TIMEOUT="${CHECK_TIMEOUT:-1}"
 
@@ -64,10 +77,10 @@ echo ""
 
 FAILED=0
 
-check_service "Unbound DNS" 53 || ((FAILED++))
-check_service "Tor SOCKS" 9050 || ((FAILED++))
-check_service "Privoxy" 8118 || ((FAILED++))
-check_service "Squid" 3128 || ((FAILED++))
+check_service "Unbound DNS" "$UNBOUND_PORT" || FAILED=$((FAILED + 1))
+check_service "Tor SOCKS" "$TOR_SOCKS_PORT" || FAILED=$((FAILED + 1))
+check_service "Privoxy" "$PRIVOXY_PORT" || FAILED=$((FAILED + 1))
+check_service "Squid" "$SQUID_PORT" || FAILED=$((FAILED + 1))
 
 echo ""
 echo "Статус Docker контейнеров:"
