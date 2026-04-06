@@ -1,40 +1,62 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-INPUT="bridges_raw.txt"
-OUTPUT="./tor/config/bridges.txt"
-TMP="/tmp/bridges_valid.txt"
+set -euo pipefail
 
-timeout_sec=5
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR" || exit 1
 
-> "$TMP"
+INPUT="${INPUT:-bridges_raw.txt}"
+OUTPUT="${OUTPUT:-./tor/config/bridges.txt}"
+TIMEOUT_SEC="${TIMEOUT_SEC:-5}"
 
-while read -r line; do
+if [[ ! -f "$INPUT" ]]; then
+	echo "Ошибка: файл со списком мостов не найден: $INPUT" >&2
+	exit 1
+fi
 
-    # пропускаем пустые строки
-    [[ -z "$line" ]] && continue
+TMP="$(mktemp)"
+trap 'rm -f "$TMP"' EXIT
 
-    # пример строки:
-    # obfs4 1.2.3.4:443 ABCDEF cert=xxxx iat-mode=0
+check_bridge() {
+	local ip="$1"
+	local port="$2"
 
-    ip_port=$(echo "$line" | awk '{print $2}')
-    ip=$(echo "$ip_port" | cut -d: -f1)
-    port=$(echo "$ip_port" | cut -d: -f2)
+	timeout "$TIMEOUT_SEC" bash -c "exec 3<>/dev/tcp/$ip/$port" 2>/dev/null
+}
 
-    echo "Checking $ip:$port"
+while IFS= read -r line; do
+	# Пропускаем пустые строки и комментарии
+	[[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
 
-    if timeout $timeout_sec bash -c "</dev/tcp/$ip/$port" 2>/dev/null; then
-        echo "OK: $ip:$port"
-        echo "Bridge $line" >> "$TMP"
-    else
-        echo "FAIL: $ip:$port"
-    fi
+	# Пример строки:
+	# obfs4 1.2.3.4:443 ABCDEF cert=xxxx iat-mode=0
+	read -r -a parts <<<"$line"
+	ip_port="${parts[1]:-}"
+	[[ -z "$ip_port" ]] && continue
 
+	ip="${ip_port%:*}"
+	port="${ip_port##*:}"
+
+	# Если в строке нет корректного порта, пропускаем.
+	[[ "$port" =~ ^[0-9]+$ ]] || continue
+
+	echo "Checking $ip:$port"
+
+	if check_bridge "$ip" "$port"; then
+		echo "OK: $ip:$port"
+		echo "Bridge $line" >> "$TMP"
+	else
+		echo "FAIL: $ip:$port"
+	fi
 done < "$INPUT"
 
-# копируем валидные мосты
-cp "$TMP" "$OUTPUT"
-
-echo "Saved valid bridges to $OUTPUT"
+# Обновляем файл только если содержимое изменилось.
+if [[ ! -f "$OUTPUT" ]] || ! cmp -s "$TMP" "$OUTPUT"; then
+	cp "$TMP" "$OUTPUT"
+	echo "Saved valid bridges to $OUTPUT"
+else
+	echo "No bridge changes detected, skip update"
+fi
 
 make restart-tor
 echo "Restart tor"
