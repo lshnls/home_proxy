@@ -1,8 +1,10 @@
 # Docker volumes
-.tor/data
+tor/data/
+tor/data/*
 
 # IDE
 .vscode/
 .idea/
 *.code-workspace
 
+squid/ssl

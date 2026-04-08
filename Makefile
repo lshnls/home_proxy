@@ -3,6 +3,14 @@
 COMPOSE := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi)
 CURL_TIMEOUT ?= 10
 
+# Порты для тестов (те же переменные, что у docker compose)
+PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+-include $(PROJECT_DIR).env
+UNBOUND_PORT ?= 53
+TOR_SOCKS_PORT ?= 9050
+PRIVOXY_PORT ?= 8118
+SQUID_PORT ?= 3128
+
 help:
 	@echo "=== Home Proxy Docker Compose Commands ==="
 	@echo ""
@@ -68,22 +76,22 @@ shell-tor:
 shell-unbound:
 	$(COMPOSE) exec unbound /bin/bash
 
-# Тесты
+# Тесты (порты из .env: UNBOUND_PORT, TOR_SOCKS_PORT, PRIVOXY_PORT, SQUID_PORT)
 test-dns:
-	@echo "=== Проверка DNS (Unbound) ==="
-	dig @127.0.0.1 google.com || echo "DNS не работает"
+	@echo "=== Проверка DNS (Unbound, порт $(UNBOUND_PORT)) ==="
+	dig @127.0.0.1 -p $(UNBOUND_PORT) google.com || echo "DNS не работает"
 
 test-tor:
-	@echo "=== Проверка SOCKS (Tor) ==="
-	curl -sS --max-time $(CURL_TIMEOUT) -x socks5://127.0.0.1:9050 https://check.torproject.org/api/ip || echo "Tor SOCKS не доступен"
+	@echo "=== Проверка SOCKS (Tor, порт $(TOR_SOCKS_PORT)) ==="
+	curl -sS --max-time $(CURL_TIMEOUT) -x socks5://127.0.0.1:$(TOR_SOCKS_PORT) https://check.torproject.org/api/ip || echo "Tor SOCKS не доступен"
 
 test-proxy:
-	@echo "=== Проверка HTTP прокси (Privoxy) ==="
-	curl -sS --max-time $(CURL_TIMEOUT) -x http://127.0.0.1:8118 https://check.torproject.org/api/ip || echo "Privoxy не доступен"
+	@echo "=== Проверка HTTP прокси (Privoxy, порт $(PRIVOXY_PORT)) ==="
+	curl -sS --max-time $(CURL_TIMEOUT) -x http://127.0.0.1:$(PRIVOXY_PORT) https://check.torproject.org/api/ip || echo "Privoxy не доступен"
 
 test-squid:
-	@echo "=== Проверка Squid прокси ==="
-	curl -sS --max-time $(CURL_TIMEOUT) -x http://127.0.0.1:3128 https://api.ipify.org?format=json || echo "Squid не доступен"
+	@echo "=== Проверка Squid прокси (порт $(SQUID_PORT)) ==="
+	curl -sS --max-time $(CURL_TIMEOUT) -x http://127.0.0.1:$(SQUID_PORT) https://api.ipify.org?format=json || echo "Squid не доступен"
 
 test-all: test-dns test-tor test-proxy test-squid
 	@echo "=== Все тесты завершены ==="
@@ -112,7 +120,12 @@ status:
 	$(COMPOSE) ps
 	@echo ""
 	@echo "=== Использование памяти ==="
-	docker stats --no-stream home_proxy_*
+	@ids="$$($(COMPOSE) ps -q)"; \
+	if [ -n "$$ids" ]; then \
+		docker stats --no-stream $$ids; \
+	else \
+		echo "Нет запущенных контейнеров"; \
+	fi
 
 # Утилиты
 version:

@@ -3,6 +3,19 @@
 
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR" || exit 1
+if [[ -f .env ]]; then
+	set -a
+	# shellcheck source=/dev/null
+	source .env
+	set +a
+fi
+UNBOUND_PORT="${UNBOUND_PORT:-53}"
+TOR_SOCKS_PORT="${TOR_SOCKS_PORT:-9050}"
+PRIVOXY_PORT="${PRIVOXY_PORT:-8118}"
+SQUID_PORT="${SQUID_PORT:-3128}"
+
 # Таймаут проверок портов (сек)
 CHECK_TIMEOUT="${CHECK_TIMEOUT:-1}"
 
@@ -25,12 +38,21 @@ fi
 echo "=== Проверка состояния Home Proxy сервисов ==="
 echo ""
 
-# Функция для проверки
+# TCP на 127.0.0.1 (без nc: у openbsd/gnu/busybox разный набор флагов и часто ложные «не работает» с проброшенными портами)
+check_tcp_local() {
+    local port=$1
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$CHECK_TIMEOUT" bash -c "exec 3<>/dev/tcp/127.0.0.1/$port" 2>/dev/null
+    else
+        bash -c "exec 3<>/dev/tcp/127.0.0.1/$port" 2>/dev/null
+    fi
+}
+
 check_service() {
     local service="$1"
     local port="$2"
 
-    if nc -z -w"$CHECK_TIMEOUT" 127.0.0.1 "$port" 2>/dev/null; then
+    if check_tcp_local "$port"; then
         echo -e "${GREEN}✓${NC} $service (порт $port) - работает"
         return 0
     else
@@ -64,10 +86,10 @@ echo ""
 
 FAILED=0
 
-check_service "Unbound DNS" 53 || ((FAILED++))
-check_service "Tor SOCKS" 9050 || ((FAILED++))
-check_service "Privoxy" 8118 || ((FAILED++))
-check_service "Squid" 3128 || ((FAILED++))
+check_service "Unbound DNS" "$UNBOUND_PORT" || FAILED=$((FAILED + 1))
+check_service "Tor SOCKS" "$TOR_SOCKS_PORT" || FAILED=$((FAILED + 1))
+check_service "Privoxy" "$PRIVOXY_PORT" || FAILED=$((FAILED + 1))
+check_service "Squid" "$SQUID_PORT" || FAILED=$((FAILED + 1))
 
 echo ""
 echo "Статус Docker контейнеров:"
