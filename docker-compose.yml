@@ -1,4 +1,20 @@
 services:
+  iptables-init:
+    image: alpine:latest
+    container_name: home_proxy-iptables-init
+    network_mode: host # Доступ к сети хоста для управления iptables
+    cap_add:
+      - NET_ADMIN # Права на управление сетью
+    volumes:
+      - ./apply-iptables.sh:/apply-iptables.sh:ro
+      - /etc/os-release:/etc/os-release:ro # Опционально, если скрипту нужно знать ОС
+    command: >
+      sh -c "apk add --no-cache iptables ip6tables && 
+             chmod +x /apply-iptables.sh && 
+             /apply-iptables.sh && 
+             echo 'IPTABLES_APPLIED_OK'"
+    restart: "no" # Запускается один раз при старте
+
   unbound:
     build:
       context: ./unbound
@@ -10,12 +26,9 @@ services:
       - "$UNBOUND_PORT:53/udp"
     volumes:
       - ./unbound/config/unbound.conf:/etc/unbound/unbound.conf
-    networks:
-      - $DOCKER_NETWORK
-#    network_mode: host
+#    networks:
+#      - $DOCKER_NETWORK
     command: unbound -d -c /etc/unbound/unbound.conf
-    #mem_limit: 32M
-    #cpus: 1
 
   tor:
     build:
@@ -25,9 +38,8 @@ services:
     restart: unless-stopped
     ports:
       - $TOR_SOCKS_PORT:9050/tcp
-    networks:
-      - $DOCKER_NETWORK
-#    network_mode: host
+#    networks:
+#      - $DOCKER_NETWORK
     volumes:
       - ./tor/config/torrc:/etc/tor/torrc
       - ./tor/config/bridges.txt:/etc/tor/bridges.txt
@@ -35,8 +47,6 @@ services:
     environment:
       - PROJECT_GID=${PROJECT_GID:-1000}
       - HOST_GROUP_NAME=${HOST_GROUP_NAME:-project}
-    #mem_limit: 256M
-    #cpus: 2
 
 
   privoxy:
@@ -47,19 +57,14 @@ services:
     restart: unless-stopped
     ports:
       - "$PRIVOXY_PORT:8118"
-#    network_mode: host
     volumes:
       - ./privoxy/config/config:/etc/privoxy/config
       - ./privoxy/config/match-all.action:/etc/privoxy/match-all.action
       - ./privoxy/config/user.action:/etc/privoxy/user.action
       - ./privoxy/config/default.action:/etc/privoxy/default.action
 
-    networks:
-      - $DOCKER_NETWORK
-#    depends_on:
-#      - tor
-    #mem_limit: 32M
-    #cpus: 1
+#    networks:
+#      - $DOCKER_NETWORK
 
   squid:
     build:
@@ -77,12 +82,8 @@ services:
     network_mode: host
 #    networks:
 #      - $DOCKER_NETWORK
-#    depends_on:
-#      - privoxy
     restart: unless-stopped
-    #mem_limit: 128M
-    #cpus: 2
 
-networks:
-  proxy_network:
-    driver: bridge
+#networks:
+#  proxy_network:
+#    driver: bridge
