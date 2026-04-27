@@ -79,12 +79,19 @@ services:
       - ./squid/config/squid.conf:/etc/squid/squid.conf
       - ./squid/config/tor.list:/etc/squid/tor.list
       - ./squid/ssl:/etc/squid/ssl
+      - squid_cache:/var/spool/squid
     network_mode: host
 #    networks:
 #      - $DOCKER_NETWORK
-    restart: always
-    stop_grace_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 15s
+    command: >
+      sh -c "find /var/spool/squid -name '*.lock' -type f -delete 2>/dev/null || true &&
+             exec squid -N -f /etc/squid/squid.conf"
 
 #networks:
 #  proxy_network:
 #    driver: bridge
+
+volumes:
+  squid_cache:
