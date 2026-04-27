@@ -2,17 +2,11 @@ services:
   iptables-init:
     image: alpine:latest
     container_name: home_proxy-iptables-init
+    privileged: true
     network_mode: host # Доступ к сети хоста для управления iptables
-    cap_add:
-      - NET_ADMIN # Права на управление сетью
     volumes:
       - ./apply-iptables.sh:/apply-iptables.sh:ro
-      - /etc/os-release:/etc/os-release:ro # Опционально, если скрипту нужно знать ОС
-    command: >
-      sh -c "apk add --no-cache iptables ip6tables && 
-             chmod +x /apply-iptables.sh && 
-             /apply-iptables.sh && 
-             echo 'IPTABLES_APPLIED_OK'"
+    command: ["sh", "-c", "apk add --no-cache iptables bash && bash /apply-iptables.sh apply"]
     restart: "no" # Запускается один раз при старте
 
   unbound:
@@ -84,7 +78,7 @@ services:
 #    networks:
 #      - $DOCKER_NETWORK
     restart: unless-stopped
-    stop_grace_period: 15s
+    stop_grace_period: 30s
     command: >
       sh -c "find /var/spool/squid -name '*.lock' -type f -delete 2>/dev/null || true &&
              exec squid -N -f /etc/squid/squid.conf"
