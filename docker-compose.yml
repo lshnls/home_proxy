@@ -69,10 +69,6 @@ services:
       - squid_cache:/var/spool/squid
     network_mode: host
     restart: unless-stopped
-#    stop_grace_period: 30s
-    command: >
-      sh -c "find /var/spool/squid -name '*.lock' -type f -delete 2>/dev/null || true &&
-             exec squid -N -f /etc/squid/squid.conf"
 
 #networks:
 #  proxy_network:
