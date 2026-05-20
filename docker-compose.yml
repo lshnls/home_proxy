@@ -1,4 +1,14 @@
 services:
+  iptables-init:
+    image: alpine:latest
+    container_name: home_proxy-iptables-init
+    privileged: true
+    network_mode: host # Доступ к сети хоста для управления iptables
+    volumes:
+      - ./apply-iptables.sh:/apply-iptables.sh:ro
+    command: ["sh", "-c", "apk add --no-cache iptables bash && bash /apply-iptables.sh apply"]
+    restart: "no" # Автозапуск при старте системы
+
   unbound:
     build:
       context: ./unbound
@@ -10,12 +20,9 @@ services:
       - "$UNBOUND_PORT:53/udp"
     volumes:
       - ./unbound/config/unbound.conf:/etc/unbound/unbound.conf
-    networks:
-      - $DOCKER_NETWORK
-#    network_mode: host
+#    networks:
+#      - $DOCKER_NETWORK
     command: unbound -d -c /etc/unbound/unbound.conf
-    #mem_limit: 32M
-    #cpus: 1
 
   tor:
     build:
@@ -25,9 +32,8 @@ services:
     restart: unless-stopped
     ports:
       - $TOR_SOCKS_PORT:9050/tcp
-    networks:
-      - $DOCKER_NETWORK
-#    network_mode: host
+#    networks:
+#      - $DOCKER_NETWORK
     volumes:
       - ./tor/config/torrc:/etc/tor/torrc
       - ./tor/config/bridges.txt:/etc/tor/bridges.txt
@@ -35,8 +41,6 @@ services:
     environment:
       - PROJECT_GID=${PROJECT_GID:-1000}
       - HOST_GROUP_NAME=${HOST_GROUP_NAME:-project}
-    #mem_limit: 256M
-    #cpus: 2
 
 
   privoxy:
@@ -47,42 +51,32 @@ services:
     restart: unless-stopped
     ports:
       - "$PRIVOXY_PORT:8118"
-#    network_mode: host
     volumes:
       - ./privoxy/config/config:/etc/privoxy/config
       - ./privoxy/config/match-all.action:/etc/privoxy/match-all.action
       - ./privoxy/config/user.action:/etc/privoxy/user.action
       - ./privoxy/config/default.action:/etc/privoxy/default.action
 
-    networks:
-      - $DOCKER_NETWORK
-#    depends_on:
-#      - tor
-    #mem_limit: 32M
-    #cpus: 1
-
   squid:
     build:
       context: ./squid
       dockerfile: Dockerfile
     container_name: home_proxy-squid
-#    ports:
-#      - "$SQUID_PORT:3128"
-#      - "$SQUID_HTTP_PORT:8081"
-#      - "$SQUID_HTTPS_PORT:8082"
     volumes:
       - ./squid/config/squid.conf:/etc/squid/squid.conf
       - ./squid/config/tor.list:/etc/squid/tor.list
       - ./squid/ssl:/etc/squid/ssl
+      - squid_cache:/var/spool/squid
     network_mode: host
-#    networks:
-#      - $DOCKER_NETWORK
-#    depends_on:
-#      - privoxy
     restart: unless-stopped
-    #mem_limit: 128M
-    #cpus: 2
+#    stop_grace_period: 30s
+    command: >
+      sh -c "find /var/spool/squid -name '*.lock' -type f -delete 2>/dev/null || true &&
+             exec squid -N -f /etc/squid/squid.conf"
 
-networks:
-  proxy_network:
-    driver: bridge
+#networks:
+#  proxy_network:
+#    driver: bridge
+
+volumes:
+  squid_cache:

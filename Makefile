@@ -93,7 +93,7 @@ test-squid:
 	@echo "=== Проверка Squid прокси (порт $(SQUID_PORT)) ==="
 	curl -sS --max-time $(CURL_TIMEOUT) -x http://127.0.0.1:$(SQUID_PORT) https://api.ipify.org?format=json || echo "Squid не доступен"
 
-test-all: test-dns test-tor test-proxy test-squid
+test-all: test-dns test-squid test-proxy test-tor
 	@echo "=== Все тесты завершены ==="
 
 # Управление отдельными сервисами
