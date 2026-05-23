@@ -5,7 +5,6 @@ RUN apk add --no-cache \
     openssl
 
 RUN mkdir -p /etc/squid/ssl
-COPY ./config/squid.conf /etc/squid/squid.conf
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

@@ -4,14 +4,12 @@
 
 Проект состоит из конфигурационных файлов приложений для создания полнофункциональной проксирующей системы:
 
-- **Unbound** - DNS over TLS - защищенный DNS резолюция
+- **Nginx** — реверс-прокси для сервисов Frigate и OpenClaw (порты 80, 443)
 - **iptables** — перехват TCP-трафика на портах 80 и 443 и перенаправление на прокси
-- **Squid** — прозрачный прокси, фильтрация и выборочная маршрутизация
-- **Privoxy** — преобразование HTTP(S)-трафика в SOCKS
-- **Tor** — анонимизация и выход в интернет через Tor-сеть
-- **obfs4** — транспортный плагин - кодирование Tor-трафика под случайный шум
-- **snowflake** — транспортный плагин - обход блокировок через WebRTC
-- **webtunnel** — транспортный плагин - маскировка трафика под HTTPS
+- **Squid** — прозрачный прокси, кеширование и выборочная маршрутизация через Tor
+- **Privoxy** — преобразование HTTP(S)-трафика в SOCKS5 с блокировкой рекламы
+- **Tor** — анонимизация и выход в интернет через Tor-сеть с obfs4 мостами
+- **Unbound** — DNS over TLS — защищённая DNS-резолюция
 
 
 ## Быстрый старт
@@ -66,10 +64,11 @@ make test-all
 
 | Сервис | Порт | Назначение |
 |--------|------|-----------|
+| Nginx | 80, 443/TCP | Реверс-прокси для Frigate/OpenClaw |
 | Unbound | 53/TCP/UDP | DNS over TLS |
 | Tor | 9050/TCP | SOCKS5 прокси |
 | Privoxy | 8118/TCP | HTTP прокси → Tor |
-| Squid | 3128/TCP | Прозрачный HTTP прокси |
+| Squid | 3128, 8081, 8082/TCP | Прозрачный прокси (HTTP/HTTPS intercept) |
 
 ## Безопасность
 
@@ -80,10 +79,6 @@ make test-all
 ✅ Локальные Docker сети  
 ✅ Контейнеры без лишних привилегий  
 ✅ Поддержка obfs4, snowflake и WebTunnel для скрытия Tor-трафика
-
-## Документация
-
-[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - **Архитектура и структура**
 
 ## Примеры использования
 
@@ -116,20 +111,13 @@ curl -x http://127.0.0.1:3128 https://api.ipify.org?format=json
 - минимум 500 MB RAM
 - 2-3 GB дискового пространства
 
-## Используемые образы
-
-- **mvance/unbound:latest** - Unbound DNS
-- **osminogin/tor-simple:latest** - Tor
-- **ghcr.io/binhex/arch-privoxy:latest** - Privoxy
-- **ubuntu/squid:latest** - Squid
-
 ## Типичные сценарии использования
 
 ### Сценарий 1: Безопасный домашний интернет
 ```bash
 docker-compose up -d
 # Настроить iptables для прозрачного прокси
-sudo bash scripts/setup-iptables.sh
+sudo bash apply-iptables.sh
 ```
 
 ### Сценарий 2: Анонимный доступ
@@ -183,10 +171,6 @@ MIT License
 ## Поддержка
 
 Создавайте issues для вопросов и проблем.
-
----
-
-**Архитектура:** [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
 
 ## Ошибка `MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT` при прозрачном HTTPS
 

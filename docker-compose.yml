@@ -1,4 +1,31 @@
 services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      args:
+        ALL_PROXY: socks5://192.168.1.10:9050
+        HTTP_PROXY: socks5://192.168.1.10:9050
+        HTTPS_PROXY: socks5://192.168.1.10:9050
+        NO_PROXY: localhost,127.0.0.1,::1,172.26.0.0/16
+    container_name: home_proxy-nginx
+    restart: unless-stopped
+    networks:
+      - shared-net
+    ports:
+      - "80:80"
+      - "443:443"
+
+    environment:
+      ALL_PROXY: socks5://192.168.1.10:9050
+      HTTP_PROXY: socks5://192.168.1.10:9050
+      HTTPS_PROXY: socks5://192.168.1.10:9050
+      NO_PROXY: localhost,127.0.0.1,::1,172.26.0.0/16
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf:/etc/nginx/conf:ro
+      - ./nginx/certs:/etc/nginx/certs
+
   iptables-init:
     image: alpine:latest
     container_name: home_proxy-iptables-init
@@ -53,9 +80,7 @@ services:
       - "$PRIVOXY_PORT:8118"
     volumes:
       - ./privoxy/config/config:/etc/privoxy/config
-      - ./privoxy/config/match-all.action:/etc/privoxy/match-all.action
       - ./privoxy/config/user.action:/etc/privoxy/user.action
-      - ./privoxy/config/default.action:/etc/privoxy/default.action
 
   squid:
     build:
@@ -65,7 +90,6 @@ services:
     volumes:
       - ./squid/config/squid.conf:/etc/squid/squid.conf
       - ./squid/config/tor.list:/etc/squid/tor.list
-      - ./squid/config/tor_dst.list:/etc/squid/tor_dst.list
       - ./squid/ssl:/etc/squid/ssl
       - squid_cache:/var/spool/squid
     network_mode: host
@@ -74,6 +98,10 @@ services:
 #networks:
 #  proxy_network:
 #    driver: bridge
+
+networks:
+  shared-net:
+    external: true
 
 volumes:
   squid_cache:

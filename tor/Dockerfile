@@ -4,9 +4,6 @@ FROM alpine:latest
 RUN apk add --no-cache tor obfs4proxy
 #snowflake-proxy
 
-# Copy configuration files
-COPY ./config/torrc /etc/tor/torrc
-COPY ./config/bridges.txt /etc/tor/bridges.txt
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # Make the entrypoint script executable

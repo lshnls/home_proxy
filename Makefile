@@ -1,4 +1,4 @@
-.PHONY: help build up down logs clean restart shell ps logs-tor logs-unbound logs-squid logs-privoxy shell-tor shell-unbound test-dns test-tor test-proxy test-squid test-all up-tor up-unbound up-squid up-privoxy restart-tor restart-squid status version
+.PHONY: help build up down logs clean restart shell ps logs-tor logs-unbound logs-squid logs-nginx logs-privoxy shell-tor shell-unbound test-dns test-tor test-proxy test-squid test-all up-tor up-unbound up-squid up-nginx up-privoxy restart-tor restart-squid restart-nginx status version
 
 COMPOSE := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi)
 CURL_TIMEOUT ?= 10
@@ -55,6 +55,12 @@ logs-unbound:
 logs-squid:
 	$(COMPOSE) logs -f squid
 
+logs-nginx:
+	$(COMPOSE) logs -f nginx
+
+logs-nginx:
+	$(COMPOSE) logs -f nginx
+
 logs-privoxy:
 	$(COMPOSE) logs -f privoxy
 
@@ -106,6 +112,9 @@ up-unbound:
 up-squid:
 	$(COMPOSE) up -d squid
 
+up-nginx:
+	$(COMPOSE) up -d nginx
+
 up-privoxy:
 	$(COMPOSE) up -d privoxy
 
@@ -114,6 +123,9 @@ restart-tor:
 
 restart-squid:
 	$(COMPOSE) restart squid
+
+restart-nginx:
+	$(COMPOSE) restart nginx
 
 status:
 	@echo "=== Статус контейнеров ==="

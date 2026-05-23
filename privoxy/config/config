@@ -3,8 +3,6 @@
 # Основные параметры
 confdir /etc/privoxy
 #logdir /var/log/privoxy
-actionsfile match-all.action # Default actions
-actionsfile default.action   # Standard actions
 actionsfile user.action      # User-defined actions
 
 # Слушать порт

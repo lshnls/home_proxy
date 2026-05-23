@@ -7,6 +7,8 @@ LOG_DIR=/var/log/squid
 mkdir -p "$CERT_DIR"
 mkdir -p "$LOG_DIR"
 chown squid:squid "$LOG_DIR"
+touch "$LOG_DIR/access.log" "$LOG_DIR/cache.log"
+chown squid:squid "$LOG_DIR/access.log" "$LOG_DIR/cache.log"
 
 # Cleanup stale locks and pid
 find /var/spool/squid -name '*.lock' -type f -delete 2>/dev/null || true
