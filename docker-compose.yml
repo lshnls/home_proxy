@@ -65,6 +65,7 @@ services:
     volumes:
       - ./squid/config/squid.conf:/etc/squid/squid.conf
       - ./squid/config/tor.list:/etc/squid/tor.list
+      - ./squid/config/tor_dst.list:/etc/squid/tor_dst.list
       - ./squid/ssl:/etc/squid/ssl
       - squid_cache:/var/spool/squid
     network_mode: host
