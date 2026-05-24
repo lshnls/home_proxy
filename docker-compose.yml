@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
     networks:
       - shared-net
+      - monitoring
     ports:
       - "80:80"
       - "443:443"
@@ -25,6 +26,63 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf:/etc/nginx/conf:ro
       - ./nginx/certs:/etc/nginx/certs
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.3.0
+    container_name: home_proxy-nginx-exporter
+    restart: unless-stopped
+    networks:
+      - monitoring
+    command:
+      - -nginx.scrape-uri=http://nginx:8080/stub_status
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: home_proxy-prometheus
+    restart: unless-stopped
+    networks:
+      - monitoring
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+  tor-bridge-exporter:
+    build:
+      context: ./tor-exporter
+      dockerfile: Dockerfile
+    container_name: home_proxy-tor-bridge-exporter
+    restart: unless-stopped
+    networks:
+      - monitoring
+    environment:
+      TOR_CONTROL_HOST: tor
+      TOR_CONTROL_PORT: "9051"
+      TOR_CONTROL_PASS: bridge_mon
+
+  squid-exporter:
+    image: boynux/squid-exporter:latest
+    container_name: home_proxy-squid-exporter
+    restart: unless-stopped
+    networks:
+      - monitoring
+    command:
+      - -squid-hostname=172.27.0.1
+      - -squid-port=3128
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: home_proxy-grafana
+    restart: unless-stopped
+    networks:
+      - monitoring
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/config/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/config/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana_data:/var/lib/grafana
 
   iptables-init:
     image: alpine:latest
@@ -61,6 +119,8 @@ services:
       - $TOR_SOCKS_PORT:9050/tcp
 #    networks:
 #      - $DOCKER_NETWORK
+    networks:
+      - monitoring
     volumes:
       - ./tor/config/torrc:/etc/tor/torrc
       - ./tor/config/bridges.txt:/etc/tor/bridges.txt
@@ -92,8 +152,22 @@ services:
       - ./squid/config/tor.list:/etc/squid/tor.list
       - ./squid/ssl:/etc/squid/ssl
       - squid_cache:/var/spool/squid
+      - ./squid/log:/var/log/squid
     network_mode: host
     restart: unless-stopped
+
+  squid-domain-exporter:
+    build:
+      context: ./squid-domain-exporter
+      dockerfile: Dockerfile
+    container_name: home_proxy-squid-domain-exporter
+    restart: unless-stopped
+    networks:
+      - monitoring
+    volumes:
+      - ./squid/log:/var/log/squid:ro
+    environment:
+      SQUID_ACCESS_LOG: /var/log/squid/access.log
 
 #networks:
 #  proxy_network:
@@ -102,6 +176,10 @@ services:
 networks:
   shared-net:
     external: true
+  monitoring:
+    driver: bridge
 
 volumes:
   squid_cache:
+  prometheus_data:
+  grafana_data:

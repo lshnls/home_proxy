@@ -1,0 +1,346 @@
+{
+  "title": "Squid Proxy",
+  "uid": "squid",
+  "version": 1,
+  "tags": ["squid"],
+  "timezone": "browser",
+  "editable": true,
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "templating": {
+    "list": [
+      {
+        "name": "src_ip",
+        "type": "query",
+        "query": {
+          "query": "label_values(squid_domain_requests_by_ip_total, src_ip)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        "current": { "selected": true },
+        "includeAll": true,
+        "allValue": ".*",
+        "defaultToAll": true,
+        "refresh": 1,
+        "multi": true,
+        "label": "Source IP"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP Requests",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [{
+        "expr": "rate(squid_client_http_requests_total[1m])",
+        "legendFormat": "requests/s"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green" }] }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Active Clients",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [{
+        "expr": "squid_info_Number_of_clients_accessing_cache"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green" }] }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Hit Rate (5m)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [{
+        "expr": "squid_info_Hits_as_pct_of_all_requests_5min"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "green", "value": 50 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "CPU Usage",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [{
+        "expr": "squid_info_CPU_Usage_5_minute_avg"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Requests Over Time",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "rate(squid_client_http_requests_total[1m])", "legendFormat": "client requests" },
+        { "expr": "rate(squid_server_http_requests_total[1m])", "legendFormat": "server requests" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Traffic",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "rate(squid_client_http_kbytes_in_kbytes_total[1m])", "legendFormat": "in" },
+        { "expr": "rate(squid_client_http_kbytes_out_kbytes_total[1m])", "legendFormat": "out" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Cache Hits & Misses",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "rate(squid_client_http_hits_total[1m])", "legendFormat": "hits" },
+        { "expr": "rate(squid_client_http_requests_total[1m]) - rate(squid_client_http_hits_total[1m])", "legendFormat": "misses" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Server Errors",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "expr": "rate(squid_server_all_errors_total[1m])", "legendFormat": "server errors" },
+        { "expr": "rate(squid_client_http_errors_total[1m])", "legendFormat": "client errors" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Direct Requests",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 18 },
+      "targets": [{
+        "expr": "sum(squid_domain_requests_by_ip_total{route=\"DIRECT\",src_ip=~\"$src_ip\"})",
+        "legendFormat": "direct"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green" }] }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Parent (Tor) Requests",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 18 },
+      "targets": [{
+        "expr": "sum(squid_domain_requests_by_ip_total{route=\"PARENT\",src_ip=~\"$src_ip\"})",
+        "legendFormat": "parent"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "orange" }] }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Request Routing Ratio",
+      "type": "piechart",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+      "targets": [{
+        "expr": "sum by (route) (squid_domain_requests_by_ip_total{src_ip=~\"$src_ip\"})",
+        "legendFormat": "{{route}}"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 12,
+      "title": "Domain Routing Breakdown",
+      "type": "table",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 26 },
+      "targets": [{
+        "expr": "sum by (domain, route) (squid_domain_requests_by_ip_total{src_ip=~\"$src_ip\"})",
+        "format": "table",
+        "instant": true
+      }],
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "domain": { "aggregations": [], "operation": "groupBy" },
+              "route": { "aggregations": [], "operation": "groupBy" },
+              "Value": { "aggregations": ["sum"], "operation": "aggregate" }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "instance": true,
+              "job": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "domain": 0,
+              "route": 1,
+              "Value (sum)": 2
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "auto",
+            "align": "left"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "domain" },
+            "properties": [
+              { "id": "displayName", "value": "Domain" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "route" },
+            "properties": [
+              { "id": "displayName", "value": "Route" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Value (sum)" },
+            "properties": [
+              { "id": "displayName", "value": "Requests" },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "basic" } }
+            ]
+          }
+        ]
+      }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "instance": true,
+              "job": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "domain": 0,
+              "route": 1,
+              "Value (sum)": 2
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "auto",
+            "align": "left"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "domain" },
+            "properties": [
+              { "id": "displayName", "value": "Domain" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "route" },
+            "properties": [
+              { "id": "displayName", "value": "Route" },
+              { "id": "custom.cellOptions", "value": { "type": "auto" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Value (sum)" },
+            "properties": [
+              { "id": "displayName", "value": "Requests" },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "basic" } }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
