@@ -1,0 +1,230 @@
+{
+  "title": "Unbound DNS",
+  "uid": "unbound-dns",
+  "version": 1,
+  "tags": ["unbound", "dns"],
+  "timezone": "browser",
+  "editable": true,
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Uptime",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "unbound_time_up_seconds", "legendFormat": "uptime" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green" }] }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Scrape OK",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [
+        { "expr": "unbound_scrape_success", "legendFormat": "scrape" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "1": { "text": "OK", "color": "green" }, "0": { "text": "FAIL", "color": "red" } } }
+          ],
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "red" }, { "color": "green", "value": 1 }] }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Total Queries",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [
+        { "expr": "unbound_total_queries", "legendFormat": "queries" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "blue" }] }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Cache Hit Ratio",
+      "type": "gauge",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 * unbound_total_cache_hits / clamp_min(unbound_total_cache_hits + unbound_total_cache_misses, 1)",
+          "legendFormat": "hit ratio"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 80 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "QPS (1m)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        { "expr": "rate(unbound_total_queries[1m])", "legendFormat": "qps" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "qps",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "purple" }] }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Queries rate (hits vs misses)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "rate(unbound_total_cache_hits[1m])", "legendFormat": "cache hits" },
+        { "expr": "rate(unbound_total_cache_misses[1m])", "legendFormat": "cache misses" },
+        { "expr": "rate(unbound_total_recursive_replies[1m])", "legendFormat": "recursive" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "qps", "custom": { "drawStyle": "line", "fillOpacity": 20 } }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Queries by type",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "rate(unbound_query_types_total[1m])", "legendFormat": "{{type}}" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "qps", "custom": { "drawStyle": "line", "fillOpacity": 10 } }
+      }
+    },
+    {
+      "id": 12,
+      "title": "Answer rcodes",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "rate(unbound_answer_rcodes_total[1m])", "legendFormat": "{{rcode}}" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "qps" }
+      }
+    },
+    {
+      "id": 13,
+      "title": "Transport (TCP / UDP / TLS)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "expr": "sum(rate(unbound_queries_tcp_total[1m]))", "legendFormat": "tcp" },
+        { "expr": "sum(rate(unbound_queries_tls_total[1m]))", "legendFormat": "tls" },
+        { "expr": "sum(rate(unbound_queries_tcpout_total[1m]))", "legendFormat": "tcp out" },
+        { "expr": "sum(rate(unbound_queries_udpout_total[1m]))", "legendFormat": "udp out" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "qps" }
+      }
+    },
+    {
+      "id": 14,
+      "title": "Cache sizes (entries)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        { "expr": "unbound_msg_cache_count", "legendFormat": "msg cache" },
+        { "expr": "unbound_rrset_cache_count", "legendFormat": "rrset cache" },
+        { "expr": "unbound_infra_cache_count", "legendFormat": "infra cache" },
+        { "expr": "unbound_key_cache_count", "legendFormat": "key cache" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short" }
+      }
+    },
+    {
+      "id": 15,
+      "title": "Memory usage",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "targets": [
+        { "expr": "unbound_memory_caches_rrset_bytes", "legendFormat": "rrset cache" },
+        { "expr": "unbound_memory_caches_message_bytes", "legendFormat": "message cache" },
+        { "expr": "unbound_memory_modules_iterator_bytes", "legendFormat": "iterator" },
+        { "expr": "unbound_memory_modules_validator_bytes", "legendFormat": "validator" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "bytes" }
+      }
+    },
+    {
+      "id": 16,
+      "title": "Recursion time",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "targets": [
+        { "expr": "avg(unbound_recursion_time_avg)", "legendFormat": "avg" },
+        { "expr": "avg(unbound_recursion_time_median)", "legendFormat": "median" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" }
+      }
+    },
+    {
+      "id": 17,
+      "title": "Request list",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "targets": [
+        { "expr": "sum(unbound_request_list_current)", "legendFormat": "current" },
+        { "expr": "sum(unbound_request_list_max)", "legendFormat": "max" },
+        { "expr": "sum(unbound_request_list_avg)", "legendFormat": "avg" },
+        { "expr": "sum(rate(unbound_request_list_exceeded_total[1m]))", "legendFormat": "exceeded /s" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short" }
+      }
+    }
+  ]
+}

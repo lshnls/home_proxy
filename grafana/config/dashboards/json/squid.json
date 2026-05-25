@@ -292,55 +292,6 @@
           }
         ]
       }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "instance": true,
-              "job": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "domain": 0,
-              "route": 1,
-              "Value (sum)": 2
-            }
-          }
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "displayMode": "auto",
-            "align": "left"
-          }
-        },
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "domain" },
-            "properties": [
-              { "id": "displayName", "value": "Domain" }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "route" },
-            "properties": [
-              { "id": "displayName", "value": "Route" },
-              { "id": "custom.cellOptions", "value": { "type": "auto" } }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Value (sum)" },
-            "properties": [
-              { "id": "displayName", "value": "Requests" },
-              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "basic" } }
-            ]
-          }
-        ]
-      }
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
-  "title": "Tor",
+  "title": "Tor Bridge Client",
   "uid": "tor",
-  "version": 1,
-  "tags": ["tor"],
+  "version": 3,
+  "tags": ["tor", "bridge"],
   "timezone": "browser",
   "editable": true,
   "refresh": "10s",
@@ -10,125 +10,10 @@
   "panels": [
     {
       "id": 1,
-      "title": "Active Connections",
+      "title": "Circuit Established",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
-      "targets": [{
-        "expr": "tor_relay_connections"
-      }],
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "thresholds": { "steps": [{ "color": "green" }] }
-        }
-      }
-    },
-    {
-      "id": 2,
-      "title": "Circuits Created",
-      "type": "stat",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
-      "targets": [{
-        "expr": "rate(tor_relay_circuits_total[1m])"
-      }],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ops",
-          "color": { "mode": "thresholds" },
-          "thresholds": { "steps": [{ "color": "green" }] }
-        }
-      }
-    },
-    {
-      "id": 3,
-      "title": "Streams Opened",
-      "type": "stat",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
-      "targets": [{
-        "expr": "rate(tor_relay_streams_total[1m])"
-      }],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ops",
-          "color": { "mode": "thresholds" },
-          "thresholds": { "steps": [{ "color": "green" }] }
-        }
-      }
-    },
-    {
-      "id": 4,
-      "title": "Traffic",
-      "type": "stat",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
-      "targets": [{
-        "expr": "rate(tor_relay_traffic_bytes[1m])"
-      }],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "Bps",
-          "color": { "mode": "thresholds" },
-          "thresholds": { "steps": [{ "color": "green" }] }
-        }
-      }
-    },
-    {
-      "id": 5,
-      "title": "Connections Over Time",
-      "type": "timeseries",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
-      "targets": [
-        { "expr": "tor_relay_connections", "legendFormat": "connections" }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" }
-        }
-      }
-    },
-    {
-      "id": 6,
-      "title": "Circuit Rate",
-      "type": "timeseries",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
-      "targets": [
-        { "expr": "rate(tor_relay_circuits_total[1m])", "legendFormat": "circuits/s" },
-        { "expr": "rate(tor_relay_streams_total[1m])", "legendFormat": "streams/s" }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ops",
-          "color": { "mode": "palette-classic" }
-        }
-      }
-    },
-    {
-      "id": 7,
-      "title": "Tor Traffic Rate",
-      "type": "timeseries",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 12 },
-      "targets": [
-        { "expr": "rate(tor_relay_traffic_bytes[1m])", "legendFormat": "bytes/s" }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "Bps",
-          "color": { "mode": "palette-classic" }
-        }
-      }
-    },
-    {
-      "id": 8,
-      "title": "Bridge Circuit Established",
-      "type": "stat",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 18 },
       "targets": [{
         "expr": "tor_bridge_circuit_established"
       }],
@@ -145,11 +30,11 @@
       }
     },
     {
-      "id": 9,
-      "title": "Bridge Bootstrap Progress",
+      "id": 2,
+      "title": "Bootstrap Progress",
       "type": "gauge",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 18 },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
       "targets": [{
         "expr": "tor_bridge_bootstrap_progress"
       }],
@@ -170,11 +55,11 @@
       }
     },
     {
-      "id": 10,
-      "title": "Bridge Status",
+      "id": 3,
+      "title": "Bridge Up",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 18 },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
       "targets": [{
         "expr": "tor_bridge_up"
       }],
@@ -191,11 +76,11 @@
       }
     },
     {
-      "id": 11,
+      "id": 4,
       "title": "Configured Bridges",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 22 },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
       "targets": [{
         "expr": "tor_bridge_configured_total"
       }],
@@ -207,11 +92,11 @@
       }
     },
     {
-      "id": 12,
+      "id": 5,
       "title": "Reachable Bridges",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 22 },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 4 },
       "targets": [{
         "expr": "tor_bridge_reachable_total"
       }],
@@ -228,11 +113,11 @@
       }
     },
     {
-      "id": 13,
-      "title": "Unreachable",
+      "id": 6,
+      "title": "Unreachable Bridges",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 22 },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 4 },
       "targets": [{
         "expr": "tor_bridge_unreachable_total"
       }],
@@ -249,38 +134,77 @@
       }
     },
     {
-      "id": 14,
-      "title": "Never Connected",
+      "id": 7,
+      "title": "WebTunnel Configured",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 22 },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 4 },
       "targets": [{
-        "expr": "tor_bridge_never_connected_total"
+        "expr": "count(tor_bridge_info{transport=\"webtunnel\"})"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "blue" }] }
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "WebTunnel Reachable",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 4 },
+      "targets": [{
+        "expr": "count(tor_bridge_info{transport=\"webtunnel\",status=~\"up|reachable\"})"
       }],
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "thresholds": {
             "steps": [
-              { "color": "green", "value": 0 },
-              { "color": "red", "value": 1 }
+              { "color": "red", "value": 0 },
+              { "color": "green", "value": 1 }
             ]
           }
         }
       }
     },
     {
-      "id": 15,
+      "id": 9,
+      "title": "Bridges by Transport",
+      "type": "barchart",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [{
+        "expr": "count by (transport) (tor_bridge_info)",
+        "legendFormat": "{{transport}}"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 10,
       "title": "Bridge Details",
       "type": "table",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 26 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "targets": [{
         "expr": "tor_bridge_info",
         "format": "table",
         "instant": true
       }],
       "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": "<status>",
+            "reverse": true
+          }
+        },
         {
           "id": "organize",
           "options": {

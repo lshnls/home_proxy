@@ -15,12 +15,12 @@ LISTEN_PORT = int(os.environ.get("LISTEN_PORT", "9320"))
 
 def parse_bridge_line(line):
     parts = line.split()
-    if len(parts) < 1:
+    if len(parts) < 2:
         return None
     transport = parts[0]
     host = ""
     fingerprint = ""
-    if transport == "obfs4" and len(parts) >= 3:
+    if transport in ("obfs4", "webtunnel") and len(parts) >= 3:
         host = parts[1]
         fingerprint = parts[2]
     return {"transport": transport, "host": host, "fingerprint": fingerprint}
@@ -35,6 +35,8 @@ def parse_entry_guards(text):
         if fp_end == -1:
             continue
         fp = line[:fp_end]
+        if "~" in fp:
+            fp = fp.split("~")[0]
         rest = line[fp_end + 1:].split()
         status = rest[0] if rest else "unknown"
         guards[fp] = status
@@ -71,6 +73,9 @@ def get_metrics():
             guard_statuses = parse_entry_guards(entry_text)
 
             configured = 0
+            reachable = 0
+            unreachable = 0
+            never_conn = 0
             for b in bridges:
                 parsed = parse_bridge_line(b)
                 if parsed is None:
@@ -79,15 +84,16 @@ def get_metrics():
                 fp = parsed["fingerprint"]
                 fp_short = fp[:8] if len(fp) >= 8 else fp
                 status = guard_statuses.get(f"${fp}", "never-connected")
+                if status in ("usable", "up"):
+                    reachable += 1
+                elif status in ("unusable", "down"):
+                    unreachable += 1
+                else:
+                    never_conn += 1
                 lines.append(f'# TYPE tor_bridge_info gauge\n')
                 lines.append(f'tor_bridge_info{{host="{parsed["host"]}",transport="{parsed["transport"]}",fingerprint="{fp}",fingerprint_short="{fp_short}",status="{status}"}} 1\n')
-
             lines.append("# TYPE tor_bridge_configured_total gauge\n")
             lines.append(f"tor_bridge_configured_total {configured}\n")
-
-            reachable = sum(1 for s in guard_statuses.values() if s == "usable")
-            unreachable = sum(1 for s in guard_statuses.values() if s == "unusable")
-            never_conn = sum(1 for s in guard_statuses.values() if s == "never-connected")
             lines.append("# TYPE tor_bridge_reachable_total gauge\n")
             lines.append(f"tor_bridge_reachable_total {reachable}\n")
             lines.append("# TYPE tor_bridge_unreachable_total gauge\n")

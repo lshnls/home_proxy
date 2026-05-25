@@ -19,6 +19,11 @@ scrape_configs:
       - targets:
           - tor-bridge-exporter:9320
 
+  - job_name: unbound
+    static_configs:
+      - targets:
+          - unbound-exporter:9167
+
   - job_name: squid
     static_configs:
       - targets:

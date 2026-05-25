@@ -37,8 +37,8 @@ DataDirectory /var/lib/tor
 
 UseBridges 1
 ClientTransportPlugin obfs4 exec /usr/bin/lyrebird
+ClientTransportPlugin webtunnel exec /usr/local/bin/webtunnel
 #ClientTransportPlugin snowflake exec /usr/bin/snowflake-proxy
-#ClientTransportPlugin webtunnel exec /usr/bin/lyrebird
 
 ExcludeExitNodes {ru},{by},{kz}
 
@@ -71,11 +71,15 @@ CookieAuthentication 0
 #SafeLogging 1
 
 # быстрее выбирать узлы
-#CircuitBuildTimeout 15
-#LearnCircuitBuildTimeout 1
+CircuitBuildTimeout 30
+LearnCircuitBuildTimeout 0
+
+# использовать стабильные entry guards
+UseEntryGuards 1
+NumEntryGuards 8
 
 # использовать цепочку дольше (меньше перестроений)
-MaxCircuitDirtiness 600
+MaxCircuitDirtiness 3600
 
 # больше соединений
 ConnLimit 128
@@ -87,11 +91,11 @@ KeepalivePeriod 180
 MaxClientCircuitsPending 128
 
 # ускоряет загрузку директорий
-#UseEntryGuards 1
-#NumEntryGuards 8
+UseEntryGuards 1
+NumEntryGuards 8
 
 # чаще строить новые цепочки
-#NewCircuitPeriod 15
+NewCircuitPeriod 60
 
 
 #Log debug stdout

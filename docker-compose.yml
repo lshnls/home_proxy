@@ -105,9 +105,29 @@ services:
       - "$UNBOUND_PORT:53/udp"
     volumes:
       - ./unbound/config/unbound.conf:/etc/unbound/unbound.conf
-#    networks:
-#      - $DOCKER_NETWORK
+      - unbound_certs:/etc/unbound
+    networks:
+      - monitoring
     command: unbound -d -c /etc/unbound/unbound.conf
+
+  unbound-exporter:
+    build:
+      context: ./unbound-exporter
+      dockerfile: Dockerfile
+    container_name: home_proxy-unbound-exporter
+    restart: unless-stopped
+    depends_on:
+      - unbound
+    networks:
+      - monitoring
+    volumes:
+      - unbound_certs:/etc/unbound:ro
+      - ./unbound/config/unbound.conf:/etc/unbound/unbound.conf:ro
+    environment:
+      UNBOUND_HOST: unbound
+      UNBOUND_PORT: "8953"
+      UNBOUND_CONF: /etc/unbound/unbound.conf
+      LISTEN_PORT: "9167"
 
   tor:
     build:
@@ -141,6 +161,8 @@ services:
     volumes:
       - ./privoxy/config/config:/etc/privoxy/config
       - ./privoxy/config/user.action:/etc/privoxy/user.action
+    networks:
+      - monitoring
 
   squid:
     build:
@@ -150,6 +172,7 @@ services:
     volumes:
       - ./squid/config/squid.conf:/etc/squid/squid.conf
       - ./squid/config/tor.list:/etc/squid/tor.list
+      - ./squid/config/telegram_nets.list:/etc/squid/telegram_nets.list
       - ./squid/ssl:/etc/squid/ssl
       - squid_cache:/var/spool/squid
       - ./squid/log:/var/log/squid
@@ -183,3 +206,4 @@ volumes:
   squid_cache:
   prometheus_data:
   grafana_data:
+  unbound_certs:

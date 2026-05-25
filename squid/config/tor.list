@@ -10,8 +10,18 @@ telegram\.org
 t\.me
 telegram\.me
 \.telegram-cdn\.org
+\.tdesktop\.com
+\.tg\.dev
+core\.telegram\.org
+web\.telegram\.org
+api\.telegram\.org
+desktop\.telegram\.org
+venus\.web\.telegram\.org
+pluto\.web\.telegram\.org
+aurora\.web\.telegram\.org
+flora\.web\.telegram\.org
+stel\.com
 google\.com
-gstatic\.com
 ggpht\.com
 torproject\.org
 archive\.org
@@ -59,3 +69,5 @@ manus\.im
 volet\.com
 claude\.com
 anthropic\.com
+api\.github\.com
+speedtest\.net
